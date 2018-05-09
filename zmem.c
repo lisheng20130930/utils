@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mem.h"
+#include "zmem.h"
 #include "config.h"
 #include "log.h"
 
