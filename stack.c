@@ -1,157 +1,117 @@
-#include "cp_3thd_interface.h"
-#include "cmmn_cmmnlib.h"
-#include "cmmn_stack.h"
+#include "libos.h"
+#include "stack.h"
+
 
 #define MR_STACK_EXPOND_STEP        (16)
 
 
-typedef struct tagSt_MrStack
-{
+typedef struct tagSt_MrStack{
 	void  **pObjArray;
-	INT32   iArraySize;
-	INT32   iCurrSize;
+	int   iArraySize;
+	int   iCurrSize;
 }St_MrStack;
 
-INT32
-MR_StackCreate(TN_HANDLE *phStack)
+
+int MR_StackCreate(void* *phStack)
 {
-	St_MrStack *pMe = NULL;
-
-	pMe =(St_MrStack*)CMMN_MALLOC(sizeof(St_MrStack));
-	if(NULL == pMe)
-	{
-		return TN_NOMEMORY;
-	}
-
-	CMMN_MEMSET(pMe, 0x00, sizeof(St_MrStack));
-
-	*phStack = (TN_HANDLE)pMe;
-
-	return TN_SUCCESS;
+	St_MrStack *pMe = (St_MrStack*)malloc(sizeof(St_MrStack));
+	memset(pMe, 0x00, sizeof(St_MrStack));
+	*phStack = (void*)pMe;
+	return 0;
 }
 
-INT32
-MR_StackGetAt(TN_HANDLE hStack, INT32 iIndex, void **ppvObj)
+void* MR_StackGetAt(void* hStack, int index)
 {
 	St_MrStack *pMe = (St_MrStack*)hStack;
 
-	if(MR_StackIsEmpty(hStack))
-	{
-		return TN_FAILED;
+	if(MR_StackIsEmpty(hStack)){
+		return NULL;
 	}
 
-	if(iIndex >= pMe->iCurrSize)
-	{
-		return TN_FAILED;
+	if(index >= pMe->iCurrSize){
+		return NULL;
 	}
 
-	if(MR_STACK_TOP_INDEX == iIndex)
-	{
-		iIndex = pMe->iCurrSize - 1;
+	if(MR_STACK_TOP_INDEX == index){
+		index = pMe->iCurrSize - 1;
 	}
 
-	*ppvObj = pMe->pObjArray[iIndex];
-
-	return TN_SUCCESS;
+	return pMe->pObjArray[index];
 }
 
-BOOL
-MR_StackIsEmpty(TN_HANDLE hStack)
+bool MR_StackIsEmpty(void* hStack)
 {
 	St_MrStack *pMe = (St_MrStack*)hStack;
 
 	return (0 == pMe->iCurrSize);
 }
 
-static INT32
-_MR_Expond(St_MrStack *pMe)
+static int _MR_Expond(St_MrStack *pMe)
 {
-	void **pvBark = NULL;
-
-	pvBark = pMe->pObjArray;
-	
-	pMe->pObjArray= (void**)CMMN_MALLOC((pMe->iArraySize + MR_STACK_EXPOND_STEP) * sizeof(void*));
-	if(NULL == pMe->pObjArray)
-	{
-		pMe->pObjArray = pvBark;
-		return TN_NOMEMORY;
-	}
-
-	CMMN_MEMSET(pMe->pObjArray, 0x00, (pMe->iArraySize + MR_STACK_EXPOND_STEP) * sizeof(void*));
-
-	CMMN_MEMCPY(pMe->pObjArray, pvBark, pMe->iArraySize * sizeof(void*));
-	
+	void **pvBark = pMe->pObjArray;	
+	pMe->pObjArray= (void**)malloc((pMe->iArraySize + MR_STACK_EXPOND_STEP) * sizeof(void*));
+	memset(pMe->pObjArray, 0x00, (pMe->iArraySize + MR_STACK_EXPOND_STEP) * sizeof(void*));
+	memcpy(pMe->pObjArray, pvBark, pMe->iArraySize * sizeof(void*));
 	pMe->iArraySize += MR_STACK_EXPOND_STEP;
-
-	CMMN_FREE(pvBark);
-
-	return TN_SUCCESS;
+	free(pvBark);
+	return 0;
 }
 
-
-INT32
-MR_StackPush(void *hStack, void *pvItem, INT32 *piIndex)
+int MR_StackPush(void *hStack, void *pvItem, int *piIndex)
 {
 	St_MrStack *pMe = (St_MrStack*)hStack;
-	INT32 iRet = TN_SUCCESS;
+	int iRet = 0;
 
-	if(pMe->iCurrSize == pMe->iArraySize)
-	{
+	if(pMe->iCurrSize == pMe->iArraySize){
 		iRet = _MR_Expond(pMe);
 	}
 
-	if(iRet != TN_SUCCESS)
-	{
+	if(iRet != 0){
 		return iRet;
 	}
 	
 	*piIndex = pMe->iCurrSize;
 	pMe->pObjArray[pMe->iCurrSize ++] = pvItem;
 
-	return TN_SUCCESS;
+	return 0;
 }
 
-void*
-MR_StackPopup(TN_HANDLE hStack)
+void* MR_StackPopup(void* hStack)
 {
 	St_MrStack *pMe = (St_MrStack*)hStack;
 
-	if(MR_StackIsEmpty(hStack))
-	{
+	if(MR_StackIsEmpty(hStack)){
 		return NULL;
 	}
 
 	return pMe->pObjArray[pMe->iCurrSize-- - 1];
 }
 
-INT32
-MR_StackClean(TN_HANDLE hStack)
+int MR_StackClean(void* hStack)
 {
 	St_MrStack *pMe = (St_MrStack*)hStack;
 	
-	CMMN_FREE(pMe->pObjArray);
+	free(pMe->pObjArray);
 
 	pMe->iArraySize = 0;
 	pMe->iCurrSize = 0;
 	pMe->pObjArray = NULL;
 
-	return TN_SUCCESS;
+	return 0;
 }
 
-INT32
-MR_StackDelete(TN_HANDLE hStack)
+int MR_StackDelete(void* hStack)
 {
 	St_MrStack *pMe = (St_MrStack*)hStack;
 
 	MR_StackClean(hStack);
 
-	CMMN_FREE(pMe);
+	free(pMe);
 
-	return TN_SUCCESS;
+	return 0;
 }
 
-INT32
-MR_StackGetSize(TN_HANDLE hStack)
+int MR_StackSize(void* hStack)
 {
 	St_MrStack *pMe = (St_MrStack*)hStack;
 
