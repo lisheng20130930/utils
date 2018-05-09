@@ -1,23 +1,20 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "libos.h"
 #include "zmem.h"
-#include "config.h"
-#include "log.h"
 
 
 #define PREFIX_SIZE (sizeof(size_t))
 
 
-#define update_zmalloc_stat_alloc(__n) do{usedMemory += (__n);}while(0)
-#define update_zmalloc_stat_free(__n)  do{usedMemory -= (__n);}while(0)
+#define update_zmalloc_stat_alloc(__n) do{g_usedMemory += (__n);}while(0)
+#define update_zmalloc_stat_free(__n)  do{g_usedMemory -= (__n);}while(0)
+
+
+static unsigned int g_usedMemory = 0;
 
 
 void *zmalloc(size_t size) {
     void *ptr = malloc(size+PREFIX_SIZE);
-    if (!ptr){
-		DBGPRINT(EERROR,("memory oo Exception, size = %u, used_size=%du\r\n",size,usedMemory));
-		exit(0);
+    if (!ptr){		
 		return NULL;
     }
     *((size_t*)ptr) = size;
@@ -37,5 +34,10 @@ void zfree(void *ptr) {
 
 void zclear()
 {
-	usedMemory = 0;
+	g_usedMemory = 0;
+}
+
+unsigned int zusedsize()
+{
+	return g_usedMemory;
 }
