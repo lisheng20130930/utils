@@ -2,7 +2,8 @@
 #define LOG_H
 
 
-extern char* LOGFILENAME; /* logger */
+/* You should modify your file name here */
+#define LOGFILENAME "log.dat"
 
 /* logger level */
 enum{
@@ -15,7 +16,6 @@ enum{
 #define DBGPRINT(t,x)   {do{if(ELEVEL&(t)){_log x;}}while(0);}
 #define DASSERT(x)  {do{if(!(x)){DBGPRINT(EERROR,("Assert...\r\n"));}}while(0);}
 
-char* TimeToStrDateTime(char *strz);
 
 void _log(char* pszFormat, ...);
 

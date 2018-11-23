@@ -56,6 +56,7 @@
 #define stricmp strcasecmp
 #define _vsnprintf vsnprintf
 #define _snprintf snprintf
+#define strnicmp strncasecmp
 #else
 #define SIGHUP   (1)
 #endif

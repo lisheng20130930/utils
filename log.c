@@ -30,13 +30,13 @@ static void _dump(const char *strz)
 
 void _log(char* pszFormat, ...)
 {        
-    static char nPrintableStr[3*1024] = {0};
+    static char nPrintableStr[4096] = {0};
     va_list MyList;
     
-    memset(nPrintableStr, 0x00, 3*1024);  
+    memset(nPrintableStr, 0x00, 4096);  
     
     va_start(MyList, pszFormat);
-    _vsnprintf(nPrintableStr, 3*1024-1, pszFormat, MyList);
+    _vsnprintf(nPrintableStr, 4096-1, pszFormat, MyList);
     va_end(MyList);
 	
 	// printf
