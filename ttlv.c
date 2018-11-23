@@ -1,4 +1,4 @@
-#include "tlv.h"
+#include "ttlv.h"
 
 int tlv_encode(tlv_t *tlv, char *buffer)
 {
@@ -239,7 +239,7 @@ int tlv_update(tlv_t *cur, unsigned short l, char *v)
             cur->v.strValue=NULL;
         }
         if(l>0){
-            cur->v.strValue = __malloc(l);
+            cur->v.strValue = (char*)__malloc(l);
             if(!cur->v.strValue){
                 err=1;
                 break;
@@ -255,7 +255,7 @@ int tlv_update(tlv_t *cur, unsigned short l, char *v)
         }
         cur->v.bytesValue.l = l;
         if(l>0){
-            cur->v.bytesValue.b = __malloc(l);
+            cur->v.bytesValue.b = (unsigned char*)__malloc(l);
             if(!cur->v.bytesValue.b){
                 err=1;
                 break;
