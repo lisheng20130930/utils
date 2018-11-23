@@ -79,7 +79,7 @@ static int cJSON_strcasecmp(const char *s1, const char *s2)
 
 static char* cJSON_strdup(const char* str)
 {
-    return we_cmmn_strndup(str,strlen(str));
+    return cmmn_strdup(str);
 }
 
 /* Internal constructor. */
