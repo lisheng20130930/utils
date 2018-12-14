@@ -132,8 +132,5 @@ extern void cJSON_Minify(char *json);
 /* Macro for iterating over an array */
 #define cJSON_ArrayForEach(pos, head) for(pos = (head)->child; pos != NULL; pos = pos->next)
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif
