@@ -5,7 +5,7 @@
 #define MR_STACK_TOP_INDEX          (-100)
 
 
-int MR_StackCreate(void *phStack);
+int MR_StackCreate(void **phStack);
 bool MR_StackIsEmpty(void *hStack);
 void* MR_StackGetAt(void *hStack, int iIndex);
 int MR_StackPush(void *hStack, void *pvItem, int *piIndex);

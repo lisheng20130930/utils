@@ -1,34 +1,8 @@
-/*
-  Copyright (c) 2009 Dave Gamble
+#ifndef CJSON_H
+#define CJSON_H
 
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
 
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
-*/
-
-#ifndef cJSON__h
-#define cJSON__h
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-#include <stddef.h>
+#include "libos.h"
 
 /* cJSON Types: */
 #define cJSON_False  (1 << 0)
@@ -82,7 +56,7 @@ extern char  *cJSON_Print(const cJSON *item);
 /* Render a cJSON entity to text for transfer/storage without any formatting. Free the char* when finished. */
 extern char  *cJSON_PrintUnformatted(const cJSON *item);
 /* Render a cJSON entity to text using a buffered strategy. prebuffer is a guess at the final size. guessing well reduces reallocation. fmt=0 gives unformatted, =1 gives formatted */
-extern char *cJSON_PrintBuffered(const cJSON *item, int prebuffer, int fmt);
+extern char *cJSON_PrintBuffered(const cJSON *item, int prebuffer, bool fmt);
 /* Delete a cJSON entity and all subentities. */
 extern void   cJSON_Delete(cJSON *c);
 
@@ -92,7 +66,7 @@ extern int	  cJSON_GetArraySize(const cJSON *array);
 extern cJSON *cJSON_GetArrayItem(const cJSON *array, int item);
 /* Get item "string" from object. Case insensitive. */
 extern cJSON *cJSON_GetObjectItem(const cJSON *object, const char *string);
-extern int cJSON_HasObjectItem(const cJSON *object, const char *string);
+extern bool cJSON_HasObjectItem(const cJSON *object, const char *string);
 /* For analysing failed parses. This returns a pointer to the parse error. You'll probably need to look a few chars back to make sense of it. Defined when cJSON_Parse() returns 0. 0 when cJSON_Parse() succeeds. */
 extern const char *cJSON_GetErrorPtr(void);
 
@@ -100,7 +74,7 @@ extern const char *cJSON_GetErrorPtr(void);
 extern cJSON *cJSON_CreateNull(void);
 extern cJSON *cJSON_CreateTrue(void);
 extern cJSON *cJSON_CreateFalse(void);
-extern cJSON *cJSON_CreateBool(int b);
+extern cJSON *cJSON_CreateBool(bool b);
 extern cJSON *cJSON_CreateNumber(double num);
 extern cJSON *cJSON_CreateString(const char *string);
 extern cJSON *cJSON_CreateArray(void);
@@ -132,14 +106,14 @@ extern void cJSON_ReplaceItemInArray(cJSON *array, int which, cJSON *newitem);
 extern void cJSON_ReplaceItemInObject(cJSON *object,const char *string,cJSON *newitem);
 
 /* Duplicate a cJSON item */
-extern cJSON *cJSON_Duplicate(const cJSON *item, int recurse);
+extern cJSON *cJSON_Duplicate(const cJSON *item, bool recurse);
 /* Duplicate will create a new, identical cJSON item to the one you pass, in new memory that will
 need to be released. With recurse!=0, it will duplicate any children connected to the item.
 The item->next and ->prev pointers are always zero on return from Duplicate. */
 
 /* ParseWithOpts allows you to require (and check) that the JSON is null terminated, and to retrieve the pointer to the final byte parsed. */
 /* If you supply a ptr in return_parse_end and parsing fails, then return_parse_end will contain a pointer to the error. If not, then cJSON_GetErrorPtr() does the job. */
-extern cJSON *cJSON_ParseWithOpts(const char *value, const char **return_parse_end, int require_null_terminated);
+extern cJSON *cJSON_ParseWithOpts(const char *value, const char **return_parse_end, bool require_null_terminated);
 
 extern void cJSON_Minify(char *json);
 

@@ -40,7 +40,9 @@ void _log(char* pszFormat, ...)
     va_end(MyList);
 	
 	// printf
+	#ifndef __ANDROID__
 	printf(nPrintableStr);
+	#endif
 
     /* write to file */
     _dump(nPrintableStr);
