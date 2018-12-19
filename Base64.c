@@ -52,8 +52,7 @@ static const signed char base64de[] = {
 	    44,  45,  46,  47,  48,  49,  50,  51,
 };
 
-int
-base64_encode(const unsigned char *in, unsigned int inlen, char *out)
+int base64_encode(const unsigned char *in, unsigned int inlen, char *out)
 {
 	unsigned int i, j;
 
@@ -86,7 +85,7 @@ base64_encode(const unsigned char *in, unsigned int inlen, char *out)
 		out[j++] = BASE64_PAD;
 	}
 
-	return BASE64_OK;
+	return j;
 }
 
 int
@@ -99,11 +98,11 @@ base64_decode(const char *in, unsigned int inlen, unsigned char *out)
 		int s = i % 4; 			/* from 8/gcd(6, 8) */
 
 		if (in[i] == '=')
-			return BASE64_OK;
+			return j;
 
 		if (in[i] < BASE64DE_FIRST || in[i] > BASE64DE_LAST ||
 		    (c = base64de[in[i] - BASE64DE_FIRST]) == -1)
-			return BASE64_INVALID;
+			return -1;
 
 		switch (s) {
 		case 0:
@@ -128,6 +127,5 @@ base64_decode(const char *in, unsigned int inlen, unsigned char *out)
 		}
 	}
 
-	return BASE64_OK;
+	return j;
 }
-
