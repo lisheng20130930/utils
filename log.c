@@ -5,6 +5,16 @@
 #include "log.h"
 
 
+#if(defined(__IOS__)||defined(__ANDROID__))
+static __inline char* log_filename(char *name)
+{
+    static char g_name[1024] = {0};
+    extern char *g_dataPathDir; //android,ios has its datadir
+    sprintf(g_name,"%s/%s",g_dataPathDir,name);
+    return g_name;
+}
+#endif
+
 char* TimeToStrDateTime(char *strz)
 {
     time_t t = time(NULL);
