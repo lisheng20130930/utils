@@ -108,8 +108,9 @@ static void Bit64ToByte(unsigned short data64[64], unsigned char *out);
 
 static void byteTo64Int(char data[8], unsigned short out[64])
 {
-	for (int i = 0; i < 8; ++i) {
-		for (int j = 7; j >= 0; --j) {
+	int i,j;
+	for (i = 0; i < 8; ++i) {
+		for (j = 7; j >= 0; --j) {
 			out[i * 8 + j] = data[i] >> (7 - j) & 1;
 		}
 	}
@@ -118,12 +119,13 @@ static void byteTo64Int(char data[8], unsigned short out[64])
 static void initKey(unsigned short key[64], unsigned short outkey[16][48])
 {
 	unsigned short int key56[56];
-	for (int i = 0; i < 56; ++i) {
+	int i,j;
+	for (i = 0; i < 56; ++i) {
 		key56[i] = key[PC_1[i] - 1];
 	}
-	for (int j = 0; j < 16; ++j) {
+	for (j = 0; j < 16; ++j) {
 		leftMoveKey(key56, shiftBits[j]);
-		for (int i = 0; i < 48; ++i) {
+		for (i = 0; i < 48; ++i) {
 			outkey[j][i] = key56[PC_2[i] - 1];
 		}
 	}
@@ -149,13 +151,14 @@ static void Des_edCryption(char * input, char * output, short mode)
 static void arrayCryption(unsigned short * data64, short mode, char * out)
 {
 	unsigned short ipdata[64];
-	for (int i = 0; i < 64; ++i) {
+	int i,j,k;
+	for (i = 0; i < 64; ++i) {
 		ipdata[i] = data64[IP[i] - 1];
 	}
-	for (int j = 0; j < 16; ++j) {
+	for (j = 0; j < 16; ++j) {
 		LoopF(ipdata, (mode ? j : 15 - j), mode);
 	}
-	for (int k = 0; k < 64; ++k) {
+	for (k = 0; k < 64; ++k) {
 		data64[k] = ipdata[IP_1[k] - 1];
 	}
 	Bit64ToByte(data64, (unsigned char*)out);
@@ -163,8 +166,9 @@ static void arrayCryption(unsigned short * data64, short mode, char * out)
 
 static void Bit64ToByte(unsigned short data64[64], unsigned char *out)
 {
-	for (int i = 0; i < 8; ++i) {
-		for (int j = 0; j < 8; ++j) {
+	int i,j;
+	for (i = 0; i < 8; ++i) {
+		for (j = 0; j < 8; ++j) {
 			out[i] |= data64[i * 8 + j] << (7 - j);
 		}
 	}
@@ -177,17 +181,17 @@ static void LoopF(unsigned short data64[64], short time, short flag)
 	unsigned short R[32];
 	unsigned short RE[48];
 	unsigned short sValue[32];
-	int i;
+	int i,m,j,k;
 
-	for (int m = 0; m < 32; ++m) {
+	for (m = 0; m < 32; ++m) {
 		R[m] = data64[32 + m];
 	}
 	for (i = 0; i < 48; ++i) {
 		RE[i] = R[E[i] - 1] ^ keyset[time][i];
 	}
-	for (int j = 0; j < 8; ++j) {
+	for (j = 0; j < 8; ++j) {
 		tmp = S_BOX[j][(RE[j * 6] << 1) | (RE[j * 6 + 5])][(RE[j * 6 + 1] << 3) | (RE[j * 6 + 2] << 2) | (RE[j * 6 + 3] << 1) | RE[j * 6 + 4]];
-		for (int k = 0; k < 4; ++k) {
+		for (k = 0; k < 4; ++k) {
 			sValue[j * 4 + 3 - k] = (tmp >> k) & 1;
 		}
 	}
@@ -195,8 +199,7 @@ static void LoopF(unsigned short data64[64], short time, short flag)
 		tmp = sValue[P[i] - 1] ^ data64[i];
 		if ((!flag &&!time) || (flag && time == 15)) {
 			data64[i] = tmp;
-		}
-		else {
+		}else {
 			data64[i] = R[i];
 			data64[i + 32] = tmp;
 		}
@@ -209,7 +212,8 @@ static void leftMoveKey(unsigned short keyarray[56], int offset)
 	short temp2 = keyarray[28];
 	short temp3 = keyarray[1];
 	short temp4 = keyarray[29];
-	for (int i = 0; i < 26; ++i) {
+	int i;
+	for (i = 0; i < 26; ++i) {
 		keyarray[i] = keyarray[offset + i];
 		keyarray[i + 28] = keyarray[offset + 28 + i];
 	}
@@ -232,11 +236,11 @@ static char* ByteDataFormat(char* data, int len, int *piLen, int flag)
 {
 	int padlen = 8 - (len % 8);
 	int newlen = len + padlen;
+	int i;
 	char* newdata = (char*)malloc(newlen);
 	memset(newdata, 0x00, newlen);
-	memcpy(newdata, data, len);
-
-	for (int i = len; i < newlen; i++) {
+	memcpy(newdata, data, len);	
+	for (i = len; i < newlen; i++) {
 		newdata[i] = (char)padlen;
 	}
 	*piLen = newlen;
@@ -252,21 +256,23 @@ static char* DES_CODE(char *sourceData, int sourceSize, char *keyStr, int *resul
 	int datalen = format_dataLen;
 	int unitcount = datalen / 8;
 	char* result_data = (char*)malloc(datalen);
+	int i;
+
 	memset(result_data, 0x00, datalen);
-
 	make_SubKey(format_key);
-
-	for (int i = 0; i < unitcount; i++) {
+	
+	for (i = 0; i < unitcount; i++) {
 		Des_edCryption(format_data + i * 8, result_data + i * 8, flag);
 	}
 
 	if (flag == 0) {
 		int total_len = datalen;
 		int delete_len = result_data[total_len - 8 - 1];
-		delete_len = ((delete_len >= 1) && (delete_len <= 8)) ? delete_len : 0;
-
 		bool del_flag = true;
-		for (int k = 0; k < delete_len; k++) {
+		int k;
+
+		delete_len = ((delete_len >= 1) && (delete_len <= 8)) ? delete_len : 0;		
+		for (k = 0; k < delete_len; k++) {
 			if (delete_len != result_data[total_len - 8 - (k + 1)]){
 				del_flag = false;
 			}
