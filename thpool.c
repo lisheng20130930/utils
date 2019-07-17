@@ -9,7 +9,9 @@
  ********************************/
 
 #define _POSIX_C_SOURCE 200809L
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,13 +24,9 @@
 
 #include "thpool.h"
 
-#ifdef THPOOL_DEBUG
-#define THPOOL_DEBUG 1
-#else
 #define THPOOL_DEBUG 0
-#endif
 
-#if !defined(DISABLE_PRINT) || defined(THPOOL_DEBUG)
+#if defined(THPOOL_DEBUG)
 #define err(str) fprintf(stderr, str)
 #else
 #define err(str)
@@ -36,7 +34,6 @@
 
 static volatile int threads_keepalive;
 static volatile int threads_on_hold;
-
 
 
 /* ========================== STRUCTURES ============================ */
@@ -91,11 +88,8 @@ typedef struct thpool_{
 
 
 /* ========================== PROTOTYPES ============================ */
-
-
 static int  thread_init(thpool_* thpool_p, struct thread** thread_p, int id);
-static void* thread_do(struct thread* thread_p);
-static void  thread_hold(int sig_id);
+static void* thread_do(void* p);
 static void  thread_destroy(struct thread* thread_p);
 
 static int   jobqueue_init(jobqueue* jobqueue_p);
@@ -109,11 +103,6 @@ static void  bsem_reset(struct bsem *bsem_p);
 static void  bsem_post(struct bsem *bsem_p);
 static void  bsem_post_all(struct bsem *bsem_p);
 static void  bsem_wait(struct bsem *bsem_p);
-
-
-
-
-
 /* ========================== THREADPOOL ============================ */
 
 
@@ -227,7 +216,9 @@ void thpool_destroy(thpool_* thpool_p){
 	/* Poll remaining threads */
 	while (thpool_p->num_threads_alive){
 		bsem_post_all(thpool_p->jobqueue.has_jobs);
+#ifndef WIN32
 		sleep(1);
+#endif
 	}
 
 	/* Job queue cleanup */
@@ -242,37 +233,12 @@ void thpool_destroy(thpool_* thpool_p){
 }
 
 
-/* Pause all threads in threadpool */
-void thpool_pause(thpool_* thpool_p) {
-	int n;
-	for (n=0; n < thpool_p->num_threads_alive; n++){
-		pthread_kill(thpool_p->threads[n]->pthread, SIGUSR1);
-	}
-}
-
-
-/* Resume all threads in threadpool */
-void thpool_resume(thpool_* thpool_p) {
-    // resuming a single threadpool hasn't been
-    // implemented yet, meanwhile this supresses
-    // the warnings
-    (void)thpool_p;
-
-	threads_on_hold = 0;
-}
-
-
 int thpool_num_threads_working(thpool_* thpool_p){
 	return thpool_p->num_threads_working;
 }
 
 
-
-
-
 /* ============================ THREAD ============================== */
-
-
 /* Initialize a thread in the thread pool
  *
  * @param thread        address to the pointer of the thread to be created
@@ -290,21 +256,10 @@ static int thread_init (thpool_* thpool_p, struct thread** thread_p, int id){
 	(*thread_p)->thpool_p = thpool_p;
 	(*thread_p)->id       = id;
 
-	pthread_create(&(*thread_p)->pthread, NULL, (void *)thread_do, (*thread_p));
+	pthread_create(&(*thread_p)->pthread, NULL, thread_do, (*thread_p));
 	pthread_detach((*thread_p)->pthread);
 	return 0;
 }
-
-
-/* Sets the calling thread on hold */
-static void thread_hold(int sig_id) {
-    (void)sig_id;
-	threads_on_hold = 1;
-	while (threads_on_hold){
-		sleep(1);
-	}
-}
-
 
 /* What each thread is doing
 *
@@ -314,33 +269,12 @@ static void thread_hold(int sig_id) {
 * @param  thread        thread that will run this function
 * @return nothing
 */
-static void* thread_do(struct thread* thread_p){
-
-	/* Set thread name for profiling and debuging */
-	char thread_name[128] = {0};
-	sprintf(thread_name, "thread-pool-%d", thread_p->id);
-
-#if defined(__linux__)
-	/* Use prctl instead to prevent using _GNU_SOURCE flag and implicit declaration */
-	prctl(PR_SET_NAME, thread_name);
-#elif defined(__APPLE__) && defined(__MACH__)
-	pthread_setname_np(thread_name);
-#else
-	err("thread_do(): pthread_setname_np is not supported on this system");
-#endif
+static void* thread_do(void* p){
+	struct thread* thread_p = (struct thread*)p;	
 
 	/* Assure all threads have been created before starting serving */
 	thpool_* thpool_p = thread_p->thpool_p;
-
-	/* Register signal handler */
-	struct sigaction act;
-	sigemptyset(&act.sa_mask);
-	act.sa_flags = 0;
-	act.sa_handler = thread_hold;
-	if (sigaction(SIGUSR1, &act, NULL) == -1) {
-		err("thread_do(): cannot handle SIGUSR1");
-	}
-
+	
 	/* Mark thread as alive (initialized) */
 	pthread_mutex_lock(&thpool_p->thcount_lock);
 	thpool_p->num_threads_alive += 1;
@@ -389,13 +323,7 @@ static void thread_destroy (thread* thread_p){
 	free(thread_p);
 }
 
-
-
-
-
 /* ============================ JOB QUEUE =========================== */
-
-
 /* Initialize queue */
 static int jobqueue_init(jobqueue* jobqueue_p){
 	jobqueue_p->len = 0;
@@ -456,11 +384,8 @@ static void jobqueue_push(jobqueue* jobqueue_p, struct job* newjob){
 
 
 /* Get first job from queue(removes it from queue)
-<<<<<<< HEAD
  *
  * Notice: Caller MUST hold a mutex
-=======
->>>>>>> da2c0fe45e43ce0937f272c8cd2704bdc0afb490
  */
 static struct job* jobqueue_pull(jobqueue* jobqueue_p){
 
@@ -498,12 +423,7 @@ static void jobqueue_destroy(jobqueue* jobqueue_p){
 }
 
 
-
-
-
 /* ======================== SYNCHRONISATION ========================= */
-
-
 /* Init semaphore to 1 or 0 */
 static void bsem_init(bsem *bsem_p, int value) {
 	if (value < 0 || value > 1) {
