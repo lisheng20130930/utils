@@ -9,7 +9,7 @@
 static __inline char* log_filename(char *name)
 {
     static char g_name[1024] = {0};
-    extern char *g_dataPathDir; //android,ios has its data dir
+    extern char *g_dataPathDir; //android,ios has its datadir
     sprintf(g_name,"%s/%s",g_dataPathDir,name);
     return g_name;
 }
