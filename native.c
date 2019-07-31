@@ -6,7 +6,7 @@
 #define MAXHANDLER (256)
 
 struct NSHandler{
-	void (*cb)(int code, char *result);
+	native_callback cb;
 	char *cbName;
 };
 
