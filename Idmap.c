@@ -115,35 +115,34 @@ void Idmap_free(struct Idmap *map)
  * If value assigned to the given key already exist it will be replaced with
  * new value.
  */
-void Idmap_put(struct Idmap *map, const char *key, void *value)
+void* Idmap_put(struct Idmap *map, const char *key, void *value)
 {
-	unsigned int index;
-	struct Idmap_item *new_item;
-
 	if (key == NULL)
-		return;
+		return NULL;
 
-	new_item = (struct Idmap_item *)malloc(sizeof(struct Idmap_item));
+	struct Idmap_item *new_item = (struct Idmap_item *)malloc(sizeof(struct Idmap_item));
 	new_item->key = cmmn_strdup(key);
 	new_item->value = value;
 	new_item->next = NULL;
 
-	index = hash_function(key, map->size);
+	unsigned int index = hash_function(key, map->size);
 
 	if (map->table[index] == NULL) {
 		map->table[index] = new_item;
 	} else {
 		struct Idmap_item *p = map->table[index];
-
 		do {
 			if (strcmp(p->key, key) == 0) {
+				void *tmp = p->value;
+				free_item(new_item);
 				p->value = value;
-				return;
+				return tmp;
 			}
 		} while(p->next && (p = p->next));
 
 		p->next = new_item;
 	}
+	return NULL;
 }
 
 /*

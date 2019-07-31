@@ -1,13 +1,6 @@
 #include "libos.h"
 #include "native.h"
 #include "Idmap.h"
-#ifdef WIN32
-#include "winsock2.h"
-#else
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <time.h>
-#endif
 
 
 #define MAXHANDLER (256)
@@ -18,6 +11,7 @@ struct NSHandler{
 };
 
 
+static unsigned int g_seed = 0;
 static Idmap *ghMap = NULL;
 
 
@@ -67,20 +61,18 @@ void nb_routerCallback(char *cbName, int code, char *result)
 	}
 }
 
-static char* getRandomKey()
+static char* getRandomKey(char *method)
 {
-	static char gKey[32] = {0};
-	struct timeval tv = {0};	
-    cp_gettimeofday(&tv, NULL);
-	sprintf(gKey,"%u%u",tv.tv_sec,tv.tv_usec);
+	static char gKey[64] = {0};	
+	sprintf(gKey,"%u@%s",g_seed,method);
+	g_seed++;
 	return gKey;
 }
 
 void nb_callRouter(char *method, char *reqStr, native_callback cb)
 {
 	extern void plat_callRouter(char*, char*, char*);
-	char *cbName = getRandomKey();
-	pushHandler(cbName,cb);
-	
+	char *cbName = getRandomKey(method);
+	pushHandler(cbName,cb);	
 	plat_callRouter(cbName,method,reqStr);
 }

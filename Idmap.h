@@ -24,7 +24,8 @@ typedef struct Idmap_iterator {
 
 struct Idmap *Idmap_create(unsigned int size);
 void Idmap_free(struct Idmap *map);
-void Idmap_put(struct Idmap *map, const char *key, void *value);
+/* If override, I will return the old value */
+void* Idmap_put(struct Idmap *map, const char *key, void *value);
 void *Idmap_get(struct Idmap *map, const char *key);
 void *Idmap_remove(struct Idmap *map, const char *key);
 int Idmap_size(struct Idmap *map);
