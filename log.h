@@ -18,7 +18,7 @@ enum{
 };
 
 #define DBGPRINT(t,x)   {do{if(ELEVEL&(t)){_log x;}}while(0);}
-#define DASSERT(x)  {do{if(!(x)){DBGPRINT(EERROR,("Assert...\r\n"));}}while(0);}
+#define DASSERT(x)  {do{if(!(x)){DBGPRINT(EERROR,("[Exception] Assert...\r\n"));}}while(0);}
 
 
 void _log(char* pszFormat, ...);

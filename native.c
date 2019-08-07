@@ -69,6 +69,10 @@ static char* getRandomKey(char *method)
 	return gKey;
 }
 
+#ifdef WIN32
+void plat_callRouter(char*, char*, char*){}
+#endif
+
 void nb_callRouter(char *method, char *reqStr, native_callback cb)
 {
 	extern void plat_callRouter(char*, char*, char*);
