@@ -64,5 +64,5 @@ void _log(char* pszFormat, ...)
 	#endif
 
     /* write to file */
-    _dump(__min(len,4095),nPrintableStr);
+    _dump(len,nPrintableStr);
 }
