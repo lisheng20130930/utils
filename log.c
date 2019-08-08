@@ -20,7 +20,7 @@ char* traceHeader(char *strz, int len)
     time_t t = time(NULL);
     struct tm *ptm = localtime(&t);
     
-    sprintf(strz,"%04d-%02d-%02d %02d:%02d:%02d <%d>",ptm->tm_year+1900, ptm->tm_mon+1,ptm->tm_mday,ptm->tm_hour,ptm->tm_min,ptm->tm_sec, len);
+    sprintf(strz,"%04d@%04d-%02d-%02d %02d:%02d:%02d",len, ptm->tm_year+1900,ptm->tm_mon+1,ptm->tm_mday,ptm->tm_hour,ptm->tm_min,ptm->tm_sec);
     
     return strz;
 }
@@ -43,12 +43,15 @@ void _log(char* pszFormat, ...)
     static char nPrintableStr[4096] = {0};
     va_list MyList;
 	int len = 0;
-    
-    memset(nPrintableStr, 0x00, 4096);  
-    
+        
     va_start(MyList, pszFormat);
-    len =_vsnprintf(nPrintableStr, 4096-1, pszFormat, MyList);
+    len =_vsnprintf(nPrintableStr, 4095, pszFormat, MyList);
     va_end(MyList);
+
+	//get real len for not-enough space
+	if(len<0||len>=4095){
+		len = strlen(nPrintableStr);
+	}
 	
 	// printf
 	#ifndef __ANDROID__
@@ -56,5 +59,5 @@ void _log(char* pszFormat, ...)
 	#endif
 
     /* write to file */
-    _dump(__min(len,4096),nPrintableStr);
+    _dump(__min(len,4095),nPrintableStr);
 }

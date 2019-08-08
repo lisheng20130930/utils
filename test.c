@@ -107,8 +107,8 @@ int main(int argc, char ** argv)
     int len = 0,new_len = 0,old_len = 0;
     len = strlen(str);
     new_str = php_url_encode(str,len,&new_len);
-    DBGPRINT(EERROR,("new string : %s,new length : %d\n",new_str,new_len));
+    DBGPRINT(EERROR,("%s","123456789\r\n"));
     old_len = php_url_decode(new_str,new_len);
-    DBGPRINT(EERROR,("old string : %s,old length : %d\n",new_str,old_len));
+    DBGPRINT(EERROR,("old string : %s,old length : %d\r\n",new_str,old_len));
     return 0;
 }
