@@ -69,6 +69,7 @@ int   cmmn_strincmp(char* pszStr1, char* pszStr2,int iLen);
 char* fmt2(const char * format, ...);
 int   natoi(char *str, int n);
 int   nrand();
+unsigned int geticktime();
 
 
 

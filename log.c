@@ -17,10 +17,15 @@ static __inline char* log_filename(char *name)
 
 char* traceHeader(char *strz, int len)
 {
+	static unsigned int g_lifeCycle = 0;	
     time_t t = time(NULL);
     struct tm *ptm = localtime(&t);
+
+	if(g_lifeCycle==0){
+		g_lifeCycle = geticktime();
+	}
     
-    sprintf(strz,"%04d@%04d-%02d-%02d %02d:%02d:%02d",len, ptm->tm_year+1900,ptm->tm_mon+1,ptm->tm_mday,ptm->tm_hour,ptm->tm_min,ptm->tm_sec);
+    sprintf(strz,"%04d%u@%04d-%02d-%02d %02d:%02d:%02d",len,g_lifeCycle,ptm->tm_year+1900,ptm->tm_mon+1,ptm->tm_mday,ptm->tm_hour,ptm->tm_min,ptm->tm_sec);
     
     return strz;
 }
