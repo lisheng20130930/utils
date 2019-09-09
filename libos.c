@@ -84,11 +84,11 @@ int cmmn_strincmp(char* pszStr1, char* pszStr2,int iLen)
 
 char* fmt2(const char * format, ...)
 {
-	static char number[1024] = {0};
+	static char number[2048] = {0};
 	va_list MyList;
-	memset(number, 0x00, 1024);
+	memset(number, 0x00, 2048);
 	va_start(MyList, format);
-    _vsnprintf(number, 1023, format, MyList);
+    _vsnprintf(number, 2047, format, MyList);
     va_end(MyList);
 	return number;
 }

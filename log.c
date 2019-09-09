@@ -24,10 +24,10 @@ char* traceHeader(char *strz, int len)
     struct tm *ptm = localtime(&t);
 
 	if(g_lifeCycle==0){
-		g_lifeCycle = geticktime();
+		g_lifeCycle = t;
 	}
     
-    sprintf(strz,"%04d%u@%04d-%02d-%02d %02d:%02d:%02d",len,g_lifeCycle,ptm->tm_year+1900,ptm->tm_mon+1,ptm->tm_mday,ptm->tm_hour,ptm->tm_min,ptm->tm_sec);
+    sprintf(strz,"%04d%010u@%04d-%02d-%02d %02d:%02d:%02d",len,g_lifeCycle,ptm->tm_year+1900,ptm->tm_mon+1,ptm->tm_mday,ptm->tm_hour,ptm->tm_min,ptm->tm_sec);
     strz[TRACE_HEADER_LEN-1] = ' ';
     return strz;
 }
