@@ -126,10 +126,6 @@ SOURCE=..\utils\Des.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\FileMerge.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\utils\Idmap.c
 # End Source File
 # Begin Source File
